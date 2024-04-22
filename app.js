@@ -1,6 +1,12 @@
 const express = require('express')
+const morgan = require('morgan')
+
+
 
 const app = express()
+
+//connect to mongoDB
+const dbURI = 'mongodb+srv://netninja:hcog-horse-nettheworld101@accountinfo.nmlfwry.mongodb.net/'
 
 // listen for request
 app.listen(3000)
@@ -11,7 +17,20 @@ app.set('view engine', 'ejs')
     //app.set('views', 'myviews')
 // if i wanted my views folder to be named smth else
 
+// app.use((req,res, next) => {
+//     // all properties of the req.
+//     console.log('new request made: ');
+//     console.log('host: ', req.hostname);
+//     console.log('path: ', req.path);
+//     console.log('method: ', req.method);
+//     next();
+//     //we finish with this middleware, move on.
+// })
 
+// middleware & static files
+app.use(express.static('public'));
+
+app.use(morgan('dev'))
 
 app.get('/', (req,res) => {
     //res.send('<p> home page </p>')
@@ -45,3 +64,5 @@ app.use((req, res)=> {
     res.status(404).render('404', {title:'404'})
     // edit status code to be 404 cuz its not considered an error
 })
+
+// .use is mdddle ware
