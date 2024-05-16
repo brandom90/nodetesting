@@ -1,57 +1,41 @@
-const http = require('http');
-const fs = require('fs');
-const _ = require('lodash');
+require('dotenv').config()
 
-const server = http.createServer((req, res) => {
+const express = require('express')
+const mongoose = require('mongoose')
 
-  // lodash
-  const num = _.random(0, 20);
-  console.log(num);
+//imports all routes in workout.js
+const workoutRoutes = require('./routes/workouts')
 
-  const greet = _.once(() => {
-    console.log('hello');
-  });
-  greet();
-  greet();
+// express app, express is stored here
+const app = express()
 
-  // set header content type, EXPRESSE AUTOMATICLY DOES THAT!
-  res.setHeader('Content-Type', 'text/html');
+//middleware, for every req that comes in this runs.
+// if app sees if data has a body, it gets it (express.json()) and passes it to the req object
+app.use(express.json())
 
-  // routing
-  let path = './views/';
-  switch(req.url) {
-    case '/':
-      path += 'index.html';
-      res.statusCode = 200;
-      break;
-    case '/about':
-      path += 'about.html';
-      res.statusCode = 200;
-      break;
-    case '/about-us':
-      res.statusCode = 301;
-      res.setHeader('Location', '/about');
-      res.end();
-      break;
-    default:
-      path += '404.html';
-      res.statusCode = 404;
-  }
+app.use((req,res,next) => {
+    console.log(req,path, req.method)
+    next()
+})
 
-  // send html
-  fs.readFile(path, (err, data) => {
-    if (err) {
-      console.log(err);
-      res.end();
-    }
-    //res.write(data);
-    res.end(data);
-  });
+//routes, used as shortcut
+// when user goes /api/workout forward slash, workoutRoutes start
+app.use('/api/workouts', workoutRoutes)
 
 
-});
+// connect to db
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => {
+        // listen for requests
+        app.listen(process.env.PORT, () => {
+            console.log('connected to db & listening on port ', process.env.PORT)
+        })
+    })
+    .catch((error) => {
+        console.log(error)
+    })
 
-// localhost is the default value for 2nd argument
-server.listen(3000, 'localhost', () => {
-  console.log('listening for requests on port 3000');
-});
+
+
+
+
